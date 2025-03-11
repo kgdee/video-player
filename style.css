@@ -1,3 +1,7 @@
+@font-face {
+  font-family: "Poppins";
+  src: url("myfont.ttf") format("truetype");
+}
 
 * {
   box-sizing: border-box;
@@ -10,7 +14,8 @@
   line-height: 1;
 }
 
-a, button {
+a,
+button {
   cursor: pointer;
 }
 
@@ -23,7 +28,7 @@ a, button {
 }
 
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   background-color: #fff;
 }
 
@@ -54,7 +59,6 @@ body {
   z-index: 1;
 }
 
-
 .home-screen {
   padding: 10px;
   overflow: auto;
@@ -84,14 +88,12 @@ body {
   transition: 0.3s;
 }
 
-
 .home-screen .tips {
   padding: 10px 20px;
   line-height: 1.5;
   background-color: #e3f2fd;
   width: max-content;
 }
-
 
 #video-list {
   display: grid;
@@ -107,11 +109,9 @@ body {
 
 .video-item img {
   width: 100%;
-  border-radius: 8px;
+  border-radius: 5px;
+  margin-bottom: 2px;
 }
-
-
-
 
 .player-screen {
   position: relative;
@@ -129,6 +129,11 @@ body {
 .player-screen .overlay .title {
   padding: 10px;
   background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+}
+.player-screen .overlay .title img {
+  margin-right: 5px;
 }
 
 .player-screen .controls {
@@ -142,7 +147,7 @@ body {
   gap: 5px;
 }
 
-.player-screen .controls button{
+.player-screen .controls button {
   width: 100%;
   min-width: 100px;
   background-color: rgba(0, 0, 0, 0.75);
@@ -161,11 +166,11 @@ body {
   height: 100%;
 }
 
-.controls .control{
+.controls .control {
   position: relative;
 }
 
-.controls .control .control-modal .modal-content{
+.controls .control .control-modal .modal-content {
   position: absolute;
   left: 100%;
   top: 50%;
