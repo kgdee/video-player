@@ -1,9 +1,10 @@
 const videoList = document.getElementById("video-list");
+const tips = document.querySelector(".tips")
 const player = document.getElementById("player");
 const videoElement = document.getElementById("video-player");
 const videoSource = document.getElementById("video-source");
 const videoSubtitles = document.getElementById("video-subtitles");
-const folderPicker = document.getElementById("folder-picker");
+const folderPicker = document.getElementById("files-input");
 const videoTitle = document.querySelector(".player-screen .title")
 const playerOverlay = document.querySelector(".player-screen .overlay")
 
@@ -85,6 +86,8 @@ folderPicker.addEventListener("change", (event) => {
 });
 
 function displayVideos() {
+  hide(tips)
+
   videoList.innerHTML = "";
   videos.forEach(video => {
     const videoItem = document.createElement("div");

@@ -3,16 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Offline YouTube Clone</title>
+    <title>Offline Video Library</title>
     <link rel="stylesheet" href="style.css" />
     <script src="script.js" defer></script>
   </head>
   <body>
     <div class="app container">
       <div class="home-screen screen active">
-        <h1 class="title">Offline Video Library</h1>
+        <div class="header">
+          <h1 class="title">Offline Video Library</h1>
+          <label for="files-input" class="files-input-btn">Choose files</label>
+          <input type="file" id="files-input" webkitdirectory directory multiple />
+        </div>
 
-        <input type="file" id="folder-picker" webkitdirectory directory multiple />
+        <div class="tips">
+          Tips:<br>
+          - Supported files: Videos (.mp4), subtitles (.srt), and thumbnails (.jpg/.png).<br>
+          - Thumbnails and subtitles must have the same name as the video file.<br>
+          - This application works completely offline.          
+        </div>
+      
         <div id="video-list"></div>
       </div>
 

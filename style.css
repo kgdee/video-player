@@ -60,16 +60,48 @@ body {
   overflow: auto;
 }
 
+.home-screen .header {
+  margin-bottom: 10px;
+}
+
+.home-screen .header .title {
+  margin-bottom: 5px;
+}
+
+.home-screen #files-input {
+  display: none;
+}
+
+.files-input-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+
+.home-screen .tips {
+  padding: 10px 20px;
+  line-height: 1.5;
+  background-color: #e3f2fd;
+  width: max-content;
+}
+
+
 #video-list {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
-  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 5px;
 }
 
 .video-item {
-  width: 200px;
+  width: 100%;
+  height: 100%;
   cursor: pointer;
 }
 
