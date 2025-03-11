@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Offline YouTube Clone</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="app container">
+      <div class="home-screen screen active">
+        <h1 class="title">Offline Video Library</h1>
+
+        <input type="file" id="folder-picker" webkitdirectory directory multiple />
+        <div id="video-list"></div>
+      </div>
+
+      <div class="player-screen screen">
+        <div id="player">
+          <video id="video-player" controls>
+            <source id="video-source" src="" type="video/mp4" />
+            <track id="video-subtitles" kind="subtitles" srclang="en" label="English" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
+        <div class="overlay" onclick="hide(this)">
+          <p class="title">Video title</p>
+
+          <div class="controls" onclick="stopPropagation(event)">
+
+            <button onclick="goHome()">Back to Home</button>
+
+            <div class="control volume">
+              <button onclick="mute()" class="volume-btn">
+                Volume 50%
+              </button>
+              <div class="control-modal" onclick="blink(this)">
+                <div class="modal-content">
+                  <button onclick="changeVolume(0.25)">25%</button>
+                  <button onclick="changeVolume(0.50)">50%</button>
+                  <button onclick="changeVolume(0.75)">75%</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="control rate">
+              <button onclick="mute()" class="rate-btn">
+                speed 1x
+              </button>
+              <div class="control-modal" onclick="blink(this)">
+                <div class="modal-content">
+                  <button onclick="changePlaybackRate(0.75)">0.75x</button>
+                  <button onclick="changePlaybackRate(1)">1x</button>
+                  <button onclick="changePlaybackRate(1.25)">1.25x</button>
+                </div>
+              </div>
+            </div>
+
+            <button onclick="replay()">Replay</button>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </body>
+</html>
