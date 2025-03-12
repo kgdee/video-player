@@ -18,12 +18,7 @@
           <input type="file" id="files-input" webkitdirectory directory multiple />
         </div>
 
-        <div class="tips">
-          Tips:<br />
-          - Supported files: Videos (.mp4), subtitles (.srt), and thumbnails (.jpg/.png).<br />
-          - Thumbnails and subtitles must have the same name as the video file.<br />
-          - Downloaded version works completely offline.
-        </div>
+        <div class="instructions">Please upload your videos (.mp4), subtitles (.srt), and thumbnails (.jpg/.png) with the same name for each set. Downloaded version works completely offline</div>
 
         <div id="video-list"></div>
       </div>
@@ -55,7 +50,7 @@
             </div>
 
             <div class="control rate">
-              <button onclick="mute()" class="rate-btn">speed 1x</button>
+              <button onclick="changePlaybackRate(1)" class="rate-btn">speed 1x</button>
               <div class="control-modal" onclick="blink(this)">
                 <div class="modal-content">
                   <button onclick="changePlaybackRate(0.75)">0.75x</button>

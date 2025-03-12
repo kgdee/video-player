@@ -1,5 +1,5 @@
 const videoList = document.getElementById("video-list");
-const tips = document.querySelector(".tips");
+const instructions = document.querySelector(".instructions");
 const player = document.getElementById("player");
 const videoElement = document.getElementById("video-player");
 const videoSource = document.getElementById("video-source");
@@ -31,9 +31,17 @@ videoElement.addEventListener("pause", () => {
 });
 
 function changeVolume(volume) {
+  videoElement.muted = false
+
   videoElement.volume = volume;
 
   document.querySelector(".control.volume button").textContent = `Volume ${volume * 100}%`;
+}
+
+function mute() {
+  videoElement.muted = !videoElement.muted
+
+  document.querySelector(".control.volume button").textContent = videoElement.muted ? "Muted" : `Volume ${videoElement.volume * 100}%`
 }
 
 function changePlaybackRate(playbackRate) {
@@ -75,7 +83,7 @@ folderPicker.addEventListener("change", (event) => {
 });
 
 function displayVideos() {
-  document.querySelector(".tips").classList.add("hidden");
+  instructions.classList.add("hidden");
 
   videoList.innerHTML =
     videos
