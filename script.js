@@ -15,6 +15,7 @@ let currentVolume = localStorage.getItem(`${projectName}_currentVolume`) || 50
 
 let videos = [];
 
+let videoLoaded = false
 
 
 document.addEventListener("DOMContentLoaded", function() { 
@@ -48,6 +49,14 @@ videoElement.addEventListener("volumechange", () => {
   localStorage.setItem(`${projectName}_currentVolume`, volume)
 });
 
+videoElement.addEventListener("ratechange", () => {
+  const playbackRate = videoElement.playbackRate
+  
+  document.querySelector(".control.rate button").textContent = `Speed ${playbackRate}x`;
+  showToast(`${playbackRate}x`)
+});
+
+
 
 function pauseVideo() {
   videoElement.paused ? videoElement.play() : videoElement.pause();
@@ -71,9 +80,6 @@ function mute() {
 
 function changePlaybackRate(playbackRate) {
   videoElement.playbackRate = playbackRate;
-
-  document.querySelector(".control.rate button").textContent = `Speed ${playbackRate}x`;
-  showToast(`${playbackRate}x`)
 }
 
 function replay() {
@@ -139,6 +145,7 @@ async function loadVideo(videoId) {
     videoSubtitles.src = "";
   }
   videoElement.load();
+  videoLoaded = true
 
   changeScreen("player-screen");
 }
@@ -189,6 +196,8 @@ function toggleFullscreen() {
 
 let toastTimeout = null
 function showToast(content) {
+  if (!videoLoaded) return
+
   clearTimeout(toastTimeout)
   toast.classList.remove("hidden")
   toast.innerHTML = content
