@@ -32,9 +32,9 @@
           </video>
         </div>
 
-        <div class="overlay" onclick="hide(this)">
-          <p class="title">Video title</p>
+        <p class="title">Video title</p>
 
+        <div class="overlay" onclick="hide(this)">
           <div class="controls" onclick="stopPropagation(event)">
             <button onclick="goHome()">Back to Home</button>
 
@@ -42,9 +42,9 @@
               <button onclick="mute()" class="volume-btn">Volume 50%</button>
               <div class="control-modal" onclick="blink(this)">
                 <div class="modal-content">
-                  <button onclick="changeVolume(0.25)">25%</button>
-                  <button onclick="changeVolume(0.50)">50%</button>
-                  <button onclick="changeVolume(0.75)">75%</button>
+                  <button onclick="changeVolume(25)">25%</button>
+                  <button onclick="changeVolume(50)">50%</button>
+                  <button onclick="changeVolume(75)">75%</button>
                 </div>
               </div>
             </div>
@@ -64,6 +64,9 @@
           </div>
         </div>
       </div>
+
+      <div class="toast hidden">Toast</div>
+
     </div>
   </body>
 </html>
