@@ -6,9 +6,10 @@ const player = document.getElementById("player");
 const videoElement = document.getElementById("video-player");
 const videoSource = document.getElementById("video-source");
 const videoSubtitles = document.getElementById("video-subtitles");
-const folderPicker = document.getElementById("files-input");
+const filesInput = document.getElementById("files-input");
 const videoTitle = document.querySelector(".player-screen .title");
 const playerOverlay = document.querySelector(".player-screen .overlay");
+const loadingScreen = document.querySelector(".loading-screen");
 const toast = document.querySelector(".toast");
 
 let currentVolume = parseInt(localStorage.getItem(`${projectName}_currentVolume`)) || 50;
@@ -16,6 +17,7 @@ let currentVolume = parseInt(localStorage.getItem(`${projectName}_currentVolume`
 let videos = [];
 
 let playerIsVisible = false;
+let isLoading = false;
 
 function stopPropagation(event) {
   event.stopPropagation();
@@ -87,11 +89,18 @@ function replay() {
   videoElement.play();
 }
 
-folderPicker.addEventListener("change", (event) => {
+filesInput.addEventListener("change", (event) => {
+  setLoading(true);
+  getVideos(event.target.files);
+  displayVideos();
+  setLoading(false);
+});
+
+function getVideos(files) {
   videos = []; // Reset previous videos
   videoList.innerHTML = ""; // Clear old videos
 
-  const files = Array.from(event.target.files).map((file) => {
+  files = Array.from(files).map((file) => {
     const fileName = decodeURIComponent(file.name).split("/").pop();
     return new File([file], fileName);
   });
@@ -113,9 +122,7 @@ folderPicker.addEventListener("change", (event) => {
     };
     videos.push(videoData);
   });
-
-  displayVideos();
-});
+}
 
 function displayVideos() {
   instructions.classList.add("hidden");
@@ -188,6 +195,12 @@ function goHome() {
   playerIsVisible = false;
   changeScreen("home-screen");
   displayVideos();
+}
+
+function setLoading(loading) {
+  isLoading = loading;
+
+  loadingScreen.classList.toggle("hidden", !isLoading);
 }
 
 function toggleFullscreen() {
