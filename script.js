@@ -91,7 +91,10 @@ folderPicker.addEventListener("change", (event) => {
   videos = []; // Reset previous videos
   videoList.innerHTML = ""; // Clear old videos
 
-  const files = Array.from(event.target.files);
+  const files = Array.from(event.target.files).map((file) => {
+    const fileName = decodeURIComponent(file.name).split("/").pop();
+    return new File([file], fileName);
+  });
   const videoFiles = files.filter((file) => file.name.endsWith(".mp4"));
   const subtitleFiles = files.filter((file) => file.name.endsWith(".srt"));
   const thumbnailFiles = files.filter((file) => file.name.match(/\.(jpg|png)$/));
@@ -103,7 +106,7 @@ folderPicker.addEventListener("change", (event) => {
 
     const videoData = {
       id: videoId,
-      title: decodeURIComponent(videoFile.name.replace(".mp4", "")),
+      title: videoFile.name.replace(".mp4", ""),
       video: URL.createObjectURL(videoFile),
       subtitleFile: subtitleFile || null,
       thumbnail: thumbnailFile ? URL.createObjectURL(thumbnailFile) : "default-thumbnail.jpg",
