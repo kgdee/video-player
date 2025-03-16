@@ -89,8 +89,11 @@ function replay() {
   videoElement.play();
 }
 
-filesInput.addEventListener("change", (event) => {
+filesInput.addEventListener("input", (event) => {
   setLoading(true);
+});
+
+filesInput.addEventListener("change", (event) => {
   getVideos(event.target.files);
   displayVideos();
   setLoading(false);
