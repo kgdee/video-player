@@ -15,6 +15,8 @@ let currentVolume = parseInt(localStorage.getItem(`${projectName}_currentVolume`
 
 let videos = [];
 
+let playerIsVisible = false;
+
 function stopPropagation(event) {
   event.stopPropagation();
 }
@@ -37,7 +39,7 @@ videoElement.addEventListener("volumechange", () => {
   currentVolume = Math.floor(videoElement.volume * 100);
 
   document.querySelector(".control.volume button").textContent = videoElement.muted ? "Muted" : `Volume ${currentVolume}%`;
-  if (!videoElement.muted) showToast(`${currentVolume}%`);
+
   localStorage.setItem(`${projectName}_currentVolume`, currentVolume);
 });
 
@@ -45,34 +47,42 @@ videoElement.addEventListener("ratechange", () => {
   const playbackRate = videoElement.playbackRate;
 
   document.querySelector(".control.rate button").textContent = `Speed ${playbackRate}x`;
-  showToast(`${playbackRate}x`);
 });
 
 function pauseVideo() {
+  if (!playerIsVisible) return;
   videoElement.paused ? videoElement.play() : videoElement.pause();
 }
 
 function jump(amount) {
+  if (!playerIsVisible) return;
   videoElement.currentTime += amount;
   showToast(`${Math.abs(amount)} second${Math.abs(amount) >= 2 ? "s" : ""}`);
 }
 
 function changeVolume(value) {
+  if (!playerIsVisible) return;
   videoElement.muted = false;
 
   value = Math.max(0, Math.min(value, 100));
   videoElement.volume = value / 100;
+
+  showToast(`${Math.floor(videoElement.volume * 100)}%`);
 }
 
 function mute() {
+  if (!playerIsVisible) return;
   videoElement.muted = !videoElement.muted;
 }
 
 function changePlaybackRate(playbackRate) {
+  if (!playerIsVisible) return;
   videoElement.playbackRate = playbackRate;
+  showToast(`${videoElement.playbackRate}x`);
 }
 
 function replay() {
+  if (!playerIsVisible) return;
   videoElement.currentTime = 0;
   videoElement.play();
 }
@@ -93,7 +103,7 @@ folderPicker.addEventListener("change", (event) => {
 
     const videoData = {
       id: videoId,
-      title: videoFile.name.replace(".mp4", ""),
+      title: decodeURIComponent(videoFile.name.replace(".mp4", "")),
       video: URL.createObjectURL(videoFile),
       subtitleFile: subtitleFile || null,
       thumbnail: thumbnailFile ? URL.createObjectURL(thumbnailFile) : "default-thumbnail.jpg",
@@ -135,8 +145,8 @@ async function loadVideo(videoId) {
     videoSubtitles.src = "";
   }
   videoElement.load();
-
   videoElement.volume = currentVolume / 100;
+  playerIsVisible = true;
 
   changeScreen("player-screen");
 }
@@ -172,6 +182,7 @@ function changeScreen(screenName) {
 }
 
 function goHome() {
+  playerIsVisible = false;
   changeScreen("home-screen");
   displayVideos();
 }
