@@ -72,11 +72,11 @@ body {
   margin-bottom: 5px;
 }
 
-.home-screen #files-input {
+.home-screen .header input {
   display: none;
 }
 
-.files-input-btn {
+.header label {
   display: inline-block;
   padding: 10px 20px;
   background-color: #007bff;

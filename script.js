@@ -19,6 +19,14 @@ let videos = [];
 let playerIsVisible = false;
 let isLoading = false;
 
+document.addEventListener("DOMContentLoaded", function () {
+  if (/mobile/i.test(navigator.userAgent)) {
+    filesInput.removeAttribute("webkitdirectory");
+    filesInput.removeAttribute("directory");
+    document.querySelector(".files-input-btn").textContent = "Choose files";
+  }
+});
+
 function stopPropagation(event) {
   event.stopPropagation();
 }
@@ -89,14 +97,9 @@ function replay() {
   videoElement.play();
 }
 
-filesInput.addEventListener("input", (event) => {
-  setLoading(true);
-});
-
 filesInput.addEventListener("change", (event) => {
   getVideos(event.target.files);
   displayVideos();
-  setLoading(false);
 });
 
 function getVideos(files) {
