@@ -11,10 +11,13 @@ const videoTitle = document.querySelector(".player-screen .title");
 const controlMenu = document.querySelector(".control-menu");
 const loadingScreen = document.querySelector(".loading-screen");
 const toast = document.querySelector(".toast");
+let videoHistory = JSON.parse(localStorage.getItem("videoHistory")) || [];
 
 let currentVolume = parseInt(localStorage.getItem(`${projectName}_currentVolume`)) || 50;
 
 let videos = [];
+
+let currentVideo = null;
 
 let playerAvailable = false;
 let isLoading = false;
@@ -40,6 +43,8 @@ function blink(element) {
 videoElement.addEventListener("pause", () => {
   show(controlMenu);
   show(videoTitle);
+
+  updateHistory();
 });
 
 videoElement.addEventListener("play", () => {
@@ -149,15 +154,15 @@ function displayVideos() {
 }
 
 async function loadVideo(videoId) {
-  const videoData = videos.find((v) => v.id === videoId);
-  if (!videoData) return;
+  currentVideo = videos.find((video) => video.id === videoId);
+  if (!currentVideo) return;
 
-  videoTitle.innerHTML = `<img src="logo.png">${videoData.title}`;
+  videoTitle.innerHTML = `<img src="logo.png">${currentVideo.title}`;
   videoList.innerHTML = "";
 
-  videoSource.src = videoData.video;
-  if (videoData.subtitleFile) {
-    videoSubtitles.src = await convertSrtToVtt(videoData.subtitleFile);
+  videoSource.src = currentVideo.video;
+  if (currentVideo.subtitleFile) {
+    videoSubtitles.src = await convertSrtToVtt(currentVideo.subtitleFile);
     videoSubtitles.track.mode = "showing";
   } else {
     videoSubtitles.src = "";
@@ -165,6 +170,8 @@ async function loadVideo(videoId) {
   videoElement.load();
   videoElement.volume = currentVolume / 100;
   playerAvailable = true;
+
+  loadHistory();
 
   changeScreen("player-screen");
 }
@@ -227,6 +234,30 @@ function showToast(content) {
   toastTimeout = setTimeout(() => {
     toast.classList.add("hidden");
   }, 1000);
+}
+
+function updateHistory() {
+  const existingIndex = videoHistory.findIndex((video) => video.title === currentVideo.title);
+
+  if (existingIndex !== -1) {
+    videoHistory[existingIndex].time = videoElement.currentTime;
+  } else {
+    videoHistory.unshift({ title: currentVideo.title, time: videoElement.currentTime });
+
+    if (videoHistory.length > 10) {
+      videoHistory.pop();
+    }
+  }
+
+  localStorage.setItem("videoHistory", JSON.stringify(videoHistory));
+}
+
+function loadHistory() {
+  if (videoHistory.length <= 0) return;
+
+  const pastVideo = videoHistory.find((video) => video.title === currentVideo.title);
+
+  if (pastVideo) videoElement.currentTime = pastVideo.time;
 }
 
 document.addEventListener(
