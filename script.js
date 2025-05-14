@@ -8,7 +8,7 @@ const videoSource = document.getElementById("video-source");
 const videoSubtitles = document.getElementById("video-subtitles");
 const filesInput = document.getElementById("files-input");
 const videoTitle = document.querySelector(".player-screen .title");
-const playerOverlay = document.querySelector(".player-screen .overlay");
+const controlMenu = document.querySelector(".control-menu");
 const loadingScreen = document.querySelector(".loading-screen");
 const toast = document.querySelector(".toast");
 
@@ -16,7 +16,7 @@ let currentVolume = parseInt(localStorage.getItem(`${projectName}_currentVolume`
 
 let videos = [];
 
-let playerIsVisible = false;
+let playerAvailable = false;
 let isLoading = false;
 
 function stopPropagation(event) {
@@ -24,7 +24,11 @@ function stopPropagation(event) {
 }
 
 function hide(element) {
-  element.classList.toggle("hidden");
+  element.classList.add("hidden");
+}
+
+function show(element) {
+  element.classList.remove("hidden");
 }
 
 function blink(element) {
@@ -34,7 +38,13 @@ function blink(element) {
 }
 
 videoElement.addEventListener("pause", () => {
-  hide(playerOverlay);
+  show(controlMenu);
+  show(videoTitle);
+});
+
+videoElement.addEventListener("play", () => {
+  hide(controlMenu);
+  hide(videoTitle);
 });
 
 videoElement.addEventListener("volumechange", () => {
@@ -52,18 +62,18 @@ videoElement.addEventListener("ratechange", () => {
 });
 
 function pauseVideo() {
-  if (!playerIsVisible) return;
+  if (!playerAvailable) return;
   videoElement.paused ? videoElement.play() : videoElement.pause();
 }
 
 function jump(amount) {
-  if (!playerIsVisible) return;
+  if (!playerAvailable) return;
   videoElement.currentTime += amount;
   showToast(`${Math.abs(amount)} second${Math.abs(amount) >= 2 ? "s" : ""}`);
 }
 
 function changeVolume(value) {
-  if (!playerIsVisible) return;
+  if (!playerAvailable) return;
   videoElement.muted = false;
 
   value = Math.max(0, Math.min(value, 100));
@@ -73,18 +83,18 @@ function changeVolume(value) {
 }
 
 function mute() {
-  if (!playerIsVisible) return;
+  if (!playerAvailable) return;
   videoElement.muted = !videoElement.muted;
 }
 
 function changePlaybackRate(playbackRate) {
-  if (!playerIsVisible) return;
+  if (!playerAvailable) return;
   videoElement.playbackRate = playbackRate;
   showToast(`${videoElement.playbackRate}x`);
 }
 
 function replay() {
-  if (!playerIsVisible) return;
+  if (!playerAvailable) return;
   videoElement.currentTime = 0;
   videoElement.play();
 }
@@ -154,7 +164,7 @@ async function loadVideo(videoId) {
   }
   videoElement.load();
   videoElement.volume = currentVolume / 100;
-  playerIsVisible = true;
+  playerAvailable = true;
 
   changeScreen("player-screen");
 }
@@ -190,7 +200,7 @@ function changeScreen(screenName) {
 }
 
 function goHome() {
-  playerIsVisible = false;
+  playerAvailable = false;
   changeScreen("home-screen");
   displayVideos();
 }
@@ -219,26 +229,32 @@ function showToast(content) {
   }, 1000);
 }
 
-document.addEventListener("keydown", function (event) {
-  // Play/Pause
-  if (event.code === "Space" || event.code === "KeyK") pauseVideo();
-  // Volume controls
-  if (event.code === "ArrowUp" || event.code === "ArrowDown" || event.code === "KeyW" || event.code === "KeyS" || event.code === "KeyI" || event.code === "KeyU") {
-    let amount = 5;
-    if (event.code === "ArrowUp" || event.code === "KeyW" || event.code === "KeyI") {
-      amount = currentVolume < 5 ? 1 : 5;
-    } else {
-      amount = currentVolume <= 5 ? -1 : -5;
+document.addEventListener(
+  "keydown",
+  function (event) {
+    event.preventDefault();
+
+    // Play/Pause
+    if (event.code === "Space" || event.code === "KeyK") pauseVideo();
+    // Volume controls
+    if (event.code === "ArrowUp" || event.code === "ArrowDown" || event.code === "KeyW" || event.code === "KeyS" || event.code === "KeyI" || event.code === "KeyU") {
+      let amount = 5;
+      if (event.code === "ArrowUp" || event.code === "KeyW" || event.code === "KeyI") {
+        amount = currentVolume < 5 ? 1 : 5;
+      } else {
+        amount = currentVolume <= 5 ? -1 : -5;
+      }
+      changeVolume(currentVolume + amount);
     }
-    changeVolume(currentVolume + amount);
-  }
-  if (event.code === "KeyM") mute();
-  // Jump backward/forward
-  if (event.code === "KeyJ" || event.code === "ArrowLeft" || event.code === "KeyA") jump(-5);
-  if (event.code === "KeyL" || event.code === "ArrowRight" || event.code === "KeyD") jump(5);
-  // Fullscreen
-  if (event.code === "KeyF") toggleFullscreen();
-});
+    if (event.code === "KeyM") mute();
+    // Jump backward/forward
+    if (event.code === "KeyJ" || event.code === "ArrowLeft" || event.code === "KeyA") jump(-5);
+    if (event.code === "KeyL" || event.code === "ArrowRight" || event.code === "KeyD") jump(5);
+    // Fullscreen
+    if (event.code === "KeyF") toggleFullscreen();
+  },
+  true
+);
 
 window.addEventListener("error", (event) => {
   const error = `${event.type}: ${event.message}`;
