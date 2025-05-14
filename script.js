@@ -22,6 +22,10 @@ let currentVideo = null;
 let playerAvailable = false;
 let isLoading = false;
 
+document.addEventListener("DOMContentLoaded", function() {
+  setInterval(updateHistory(), 10000);
+});
+
 function stopPropagation(event) {
   event.stopPropagation();
 }
@@ -237,6 +241,8 @@ function showToast(content) {
 }
 
 function updateHistory() {
+  if (!playerAvailable) return
+
   const existingIndex = videoHistory.findIndex((video) => video.title === currentVideo.title);
 
   if (existingIndex !== -1) {
