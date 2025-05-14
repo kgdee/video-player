@@ -1,6 +1,6 @@
 const projectName = "yt-player";
 
-const videoList = document.getElementById("video-list");
+const videoList = document.querySelector(".video-list");
 const instructions = document.querySelector(".instructions");
 const player = document.getElementById("player");
 const videoElement = document.getElementById("video-player");
@@ -139,7 +139,7 @@ function displayVideos() {
     videos
       .map(
         (video) => `
-      <div class="video-item" onclick="loadVideo('${video.id}')">
+      <div class="item" onclick="loadVideo('${video.id}')">
         <img src="${video.thumbnail}" alt="${video.title}">
         <p>${video.title}</p>
       </div>
