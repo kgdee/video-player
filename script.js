@@ -22,6 +22,12 @@ let currentVideo = null;
 let playerAvailable = false;
 let isLoading = false;
 
+let darkTheme = JSON.parse(localStorage.getItem(`${projectName}_darkTheme`)) || false;
+
+document.addEventListener("DOMContentLoaded", function () {
+  toggleTheme(darkTheme);
+});
+
 document.addEventListener("DOMContentLoaded", function() {
   setInterval(updateHistory(), 10000);
 });
@@ -266,10 +272,18 @@ function loadHistory() {
   if (pastVideo) videoElement.currentTime = pastVideo.time;
 }
 
+function toggleTheme(force = undefined) {
+  const toggle = document.querySelector(".theme-toggle");
+  force === undefined ? (darkTheme = !darkTheme) : (darkTheme = force);
+  localStorage.setItem(`${projectName}_darkTheme`, darkTheme);
+  document.body.classList.toggle("dark-theme", darkTheme);
+  toggle.innerHTML = darkTheme ? `<i class="bi bi-sun"></i>` : `<i class="bi bi-moon"></i>`;
+}
+
 document.addEventListener(
   "keydown",
   function (event) {
-    event.preventDefault();
+    if (videoElement.contains(event.target)) event.preventDefault();
 
     // Play/Pause
     if (event.code === "Space" || event.code === "KeyK") pauseVideo();

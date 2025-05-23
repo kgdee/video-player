@@ -6,6 +6,7 @@
     <title>Offline Video Library</title>
     <link rel="icon" href="favicon.png" type="image/x-icon" />
     <link rel="shortcut icon" href="favicon.png" type="image/x-icon" />
+    <link href="libs/bootstrap-icons-1.11.3/bootstrap-icons.css" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
     <script src="script.js" defer></script>
   </head>
@@ -16,9 +17,13 @@
           <h1 class="title">Offline Video Library</h1>
           <label for="files-input" class="files-input-btn">Choose folder</label>
           <input type="file" id="files-input" webkitdirectory directory multiple />
+
+          <button class="theme-toggle" onclick="toggleTheme()">
+            <i class="bi bi-moon"></i>
+          </button>
         </div>
 
-        <div class="instructions">Please upload your videos, subtitles, and thumbnails with the same name for each set. You can download this app to use it completely offline</div>
+        <div class="instructions">Please upload your videos, subtitles, and thumbnails with the same name for each set. You can download this app and use it completely offline</div>
 
         <div class="video-list"></div>
       </div>
@@ -35,38 +40,37 @@
         <p class="title">Video title</p>
 
         <div class="control-menu">
-            <button onclick="goHome()">Back to Home</button>
+          <button onclick="goHome()">Back to Home</button>
 
-            <div class="control volume">
-              <button onclick="mute()" class="volume-btn">Volume 50%</button>
-              <div class="control-modal" onclick="blink(this)">
-                <div class="modal-content">
-                  <button onclick="changeVolume(25)">25%</button>
-                  <button onclick="changeVolume(50)">50%</button>
-                  <button onclick="changeVolume(75)">75%</button>
-                </div>
+          <div class="control volume">
+            <button onclick="mute()" class="volume-btn">Volume 50%</button>
+            <div class="control-modal" onclick="blink(this)">
+              <div class="modal-content">
+                <button onclick="changeVolume(25)">25%</button>
+                <button onclick="changeVolume(50)">50%</button>
+                <button onclick="changeVolume(75)">75%</button>
               </div>
             </div>
-
-            <div class="control rate">
-              <button onclick="changePlaybackRate(1)" class="rate-btn">speed 1x</button>
-              <div class="control-modal" onclick="blink(this)">
-                <div class="modal-content">
-                  <button onclick="changePlaybackRate(0.75)">0.75x</button>
-                  <button onclick="changePlaybackRate(1)">1x</button>
-                  <button onclick="changePlaybackRate(1.25)">1.25x</button>
-                </div>
-              </div>
-            </div>
-
-            <button onclick="replay()">Replay</button>
           </div>
+
+          <div class="control rate">
+            <button onclick="changePlaybackRate(1)" class="rate-btn">speed 1x</button>
+            <div class="control-modal" onclick="blink(this)">
+              <div class="modal-content">
+                <button onclick="changePlaybackRate(0.75)">0.75x</button>
+                <button onclick="changePlaybackRate(1)">1x</button>
+                <button onclick="changePlaybackRate(1.25)">1.25x</button>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="replay()">Replay</button>
+        </div>
       </div>
 
       <div class="loading-screen hidden"></div>
 
       <div class="toast hidden">Toast</div>
-
     </div>
   </body>
 </html>
