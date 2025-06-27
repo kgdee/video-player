@@ -37,7 +37,11 @@ function generateId() {
 }
 
 function getFileName(file) {
-  return decodeURIComponent(file.name).split("/").pop().split(".").slice(0, -1).join(".");
+  const encoded = file.name;
+  const decoded = decodeURIComponent(encoded);
+  const fileName = decoded.split("/").pop();
+
+  return fileName;
 }
 
 function getFileDataUrl(file) {

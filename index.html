@@ -35,36 +35,34 @@
 
       <div class="screen home-screen hidden">
         <h1 class="title">Video Player</h1>
-        <div class="video-list"></div>
+        <div class="videos"></div>
       </div>
 
       <div class="screen player-screen hidden">
         <div class="player">
-          <video controls>
-            <source src="" type="video/mp4" />
-            <track kind="subtitles" srclang="en" label="English" />
-            Your browser does not support the video tag.
-          </video>
+          <video controls></video>
         </div>
 
-        <p class="title">Video title</p>
+        <button class="title truncated" onclick="goHome()">Video title</button>
 
         <div class="controls">
-          <button onclick="goHome()">Back to Home</button>
+          <button onclick="goHome()">
+            <i class="bi bi-house"></i>
+          </button>
 
           <div class="control volume">
-            <button onclick="Player.mute()" class="volume-btn">Volume 50%</button>
+            <button onclick="Player.changeVolume()" class="volume-btn"><i class="bi bi-volume-down"></i> 50%</button>
             <div class="control-modal" onclick="blink(this)">
               <div class="modal-content">
-                <button onclick="Player.changeVolume(25)">25%</button>
-                <button onclick="Player.changeVolume(50)">50%</button>
-                <button onclick="Player.changeVolume(75)">75%</button>
+                <button onclick="Player.changeVolume(0.25)">25%</button>
+                <button onclick="Player.changeVolume(0.5)">50%</button>
+                <button onclick="Player.changeVolume(0.75)">75%</button>
               </div>
             </div>
           </div>
 
           <div class="control rate">
-            <button onclick="Player.changePlaybackRate()" class="rate-btn">speed 1x</button>
+            <button onclick="Player.changePlaybackRate()" class="rate-btn">1x</button>
             <div class="control-modal" onclick="blink(this)">
               <div class="modal-content">
                 <button onclick="Player.changePlaybackRate(0.75)">0.75x</button>
@@ -74,7 +72,9 @@
             </div>
           </div>
 
-          <button onclick="Player.replay()">Replay</button>
+          <button onclick="Player.replay()">
+            <i class="bi bi-arrow-counterclockwise"></i>
+          </button>
         </div>
       </div>
 

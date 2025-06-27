@@ -1,14 +1,13 @@
-const videoList = document.querySelector(".video-list");
+const videosEl = document.querySelector(".videos");
 const messageEl = document.querySelector(".message");
 const folderInput = document.querySelector(".folder-input input");
-let videoHistory = JSON.parse(localStorage.getItem("videoHistory")) || [];
+const themeToggle = document.querySelector(".theme-toggle");
 
-let currentVolume = parseInt(localStorage.getItem(`${projectName}_currentVolume`)) || 50;
-let currentFiles = []
+let histories = load("histories", []);
+let currentFiles = [];
 let currentVideos = [];
 let currentVideo = null;
-let playerAvailable = false;
-let darkTheme = JSON.parse(localStorage.getItem(`${projectName}_darkTheme`)) || false;
+let darkTheme = load("darkTheme", false);
 
 document.addEventListener("DOMContentLoaded", function () {
   toggleTheme(darkTheme);
@@ -16,9 +15,9 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function getVideos(files) {
-  currentFiles = files
+  currentFiles = files;
   currentVideos = [];
-  videoList.innerHTML = "";
+  videosEl.innerHTML = "";
 
   files = Array.from(files).map((file) => {
     const fileName = decodeURIComponent(file.name).split("/").pop();
@@ -38,7 +37,7 @@ function getVideos(files) {
       title: videoFile.name.replace(".mp4", ""),
       video: URL.createObjectURL(videoFile),
       subtitleFile: subtitleFile || null,
-      thumbnail: thumbnailFile ? URL.createObjectURL(thumbnailFile) : defaultThumbnail,
+      thumbnail: thumbnailFile ? URL.createObjectURL(thumbnailFile) : "assets/images/thumbnail.jpg",
     };
     currentVideos.push(videoData);
   });
@@ -47,13 +46,13 @@ function getVideos(files) {
 function displayVideos() {
   messageEl.classList.add("hidden");
 
-  videoList.innerHTML =
+  videosEl.innerHTML =
     currentVideos
       .map(
         (video) => `
       <div class="item" onclick="Player.loadVideo('${video.id}')">
         <img src="${video.thumbnail}" alt="${video.title}">
-        <p>${video.title}</p>
+        <span class="truncated">${video.title}</span>
       </div>
     `
       )
@@ -69,7 +68,7 @@ function changeScreen(screenName) {
 }
 
 function goHome(files) {
-  playerAvailable = false;
+  Player.isLoaded = false;
   changeScreen("home-screen");
   getVideos(files || currentFiles);
   displayVideos();
@@ -83,56 +82,63 @@ function toggleFullscreen() {
   }
 }
 
-function updateHistory() {
-  if (!playerAvailable) return;
+function updateHistory() {  
+  if (!Player.isLoaded) return;
+  
+  const history = histories.filter((video) => video.title === currentVideo.title)[0];
 
-  const existingIndex = videoHistory.findIndex((video) => video.title === currentVideo.title);
-
-  if (existingIndex !== -1) {
-    videoHistory[existingIndex].time = Player.videoEl.currentTime;
+  if (history) {
+    history.time = Player.videoEl.currentTime;
   } else {
-    videoHistory.unshift({ title: currentVideo.title, time: Player.videoEl.currentTime });
+    histories.push({ title: currentVideo.title, time: Player.videoEl.currentTime });
 
-    if (videoHistory.length > 10) {
-      videoHistory.pop();
+    if (histories.length > 10) {
+      histories.shift();
     }
   }
 
-  localStorage.setItem("videoHistory", JSON.stringify(videoHistory));
+  save("histories", histories);
 }
 
 function loadHistory() {
-  if (videoHistory.length <= 0) return;
+  if (histories.length <= 0) return;
 
-  const pastVideo = videoHistory.find((video) => video.title === currentVideo.title);
+  const pastVideo = histories.find((video) => video.title === currentVideo.title);
 
   if (pastVideo) Player.videoEl.currentTime = pastVideo.time;
 }
 
-function toggleTheme(force = undefined) {
-  const toggle = document.querySelector(".theme-toggle");
-  force === undefined ? (darkTheme = !darkTheme) : (darkTheme = force);
-  localStorage.setItem(`${projectName}_darkTheme`, darkTheme);
+function toggleTheme(force) {
+  darkTheme = force != null ? force : !darkTheme;
   document.body.classList.toggle("dark-theme", darkTheme);
-  toggle.innerHTML = darkTheme ? `<i class="bi bi-sun"></i>` : `<i class="bi bi-moon"></i>`;
+  themeToggle.innerHTML = darkTheme ? `<i class="bi bi-sun"></i>` : `<i class="bi bi-moon"></i>`;
+  save("darkTheme", darkTheme)
 }
 
 document.addEventListener("keydown", function (event) {
   if (Player.videoEl.contains(event.target)) event.preventDefault();
 
-  if (event.code === "Space" || event.code === "KeyK") Player.pauseVideo();
-  // Volume controls
-  if (event.code === "ArrowUp" || event.code === "ArrowDown" || event.code === "KeyW" || event.code === "KeyS" || event.code === "KeyI" || event.code === "KeyU") {
+  const shortcuts = {
+    pause: event.code === "Space" || event.key === " " || event.code === "KeyK",
+    volumeUp: event.code === "ArrowUp" || event.code === "KeyW" || event.code === "KeyI",
+    volumeDown: event.code === "ArrowDown" || event.code === "KeyS" || event.code === "KeyU",
+    mute: event.code === "KeyM",
+    jumpForward: event.code === "KeyL" || event.code === "ArrowRight" || event.code === "KeyD",
+    jumpBackward: event.code === "KeyJ" || event.code === "ArrowLeft" || event.code === "KeyA",
+    fullscreen: event.code === "KeyF",
+  };
+  if (shortcuts.pause) Player.pauseVideo();
+  if (shortcuts.volumeDown || shortcuts.volumeUp) {
     let amount = 5;
-    if (event.code === "ArrowUp" || event.code === "KeyW" || event.code === "KeyI") {
-      amount = currentVolume < 5 ? 1 : 5;
+    if (shortcuts.volumeUp) {
+      amount = Player.currentVolume < 0.05 ? 0.01 : 0.05;
     } else {
-      amount = currentVolume <= 5 ? -1 : -5;
+      amount = Player.currentVolume <= 0.05 ? -0.01 : -0.05;
     }
-    Player.changeVolume(currentVolume + amount);
+    Player.changeVolume(Player.currentVolume + amount);
   }
-  if (event.code === "KeyM") Player.mute();
-  if (event.code === "KeyJ" || event.code === "ArrowLeft" || event.code === "KeyA") Player.jump(-5);
-  if (event.code === "KeyL" || event.code === "ArrowRight" || event.code === "KeyD") Player.jump(5);
-  if (event.code === "KeyF") toggleFullscreen();
+  if (shortcuts.mute) Player.mute();
+  if (shortcuts.jumpForward) Player.jump(5);
+  if (shortcuts.jumpBackward) Player.jump(-5);
+  if (shortcuts.fullscreen) toggleFullscreen();
 });
