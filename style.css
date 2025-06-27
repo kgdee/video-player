@@ -106,15 +106,16 @@ body {
   justify-content: center;
   align-items: center;
   gap: 10px;
-  width: max-content;
+  width: 400px;
+  max-width: 100%;
   background-color: var(--label-color);
   border: 5px dashed var(--border-color);
-  padding: 20px 50px;
+  padding: 20px 0;
   cursor: pointer;
 }
 
 .input-screen .message {
-  max-width: 320px;
+  width: 350px;
   font-size: 0.8rem;
   opacity: 0.8;
   line-height: 1.25;
@@ -266,11 +267,15 @@ body {
 
 /* Small screens (Phones, up to 480px wide) */
 @media (max-width: 480px) {
-  .player-screen .title {
-    width: 100%;
+  .input-screen .folder-input {
+    width: 300px;
   }
 
-  .player-screen .controls {
-    display: none;
+  .input-screen .message {
+    width: 250px;
+  }
+
+  .player-screen .title {
+    width: 100%;
   }
 }
