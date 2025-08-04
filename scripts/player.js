@@ -5,7 +5,7 @@ const Player = (() => {
   const controlsEl = document.querySelector(".controls");
 
   let currentVolume = load("currentVolume", 0.5);
-  let isLoaded = false;
+  let isReady = false;
 
   videoEl.addEventListener("pause", () => {
     show(controlsEl);
@@ -33,18 +33,18 @@ const Player = (() => {
   });
 
   function pause() {
-    if (!isLoaded) return;
+    if (!isReady) return;
     videoEl.paused ? videoEl.play() : videoEl.pause();
   }
 
   function jump(amount) {
-    if (!isLoaded) return;
+    if (!isReady) return;
     videoEl.currentTime += amount;
     Toast.show(`${Math.abs(amount)} second${Math.abs(amount) >= 2 ? "s" : ""}`);
   }
 
   function changeVolume(value) {
-    if (!isLoaded) return;
+    if (!isReady) return;
 
     value = value != null ? clamp(value, 0, 1) : clamp((videoEl.volume + 0.25) % 1.25, 0, 1);
     videoEl.volume = value;
@@ -53,18 +53,18 @@ const Player = (() => {
   }
 
   function mute() {
-    if (!isLoaded) return;
+    if (!isReady) return;
     videoEl.muted = !videoEl.muted;
   }
 
   function changePlaybackRate(playbackRate) {
-    if (!isLoaded) return;
+    if (!isReady) return;
     videoEl.playbackRate = playbackRate || clamp((videoEl.playbackRate + 0.25) % 1.5, 0.75, 1.25);
     Toast.show(`${videoEl.playbackRate}x`);
   }
 
   function replay() {
-    if (!isLoaded) return;
+    if (!isReady) return;
     videoEl.currentTime = 0;
     videoEl.play();
   }
@@ -77,18 +77,14 @@ const Player = (() => {
     videosEl.innerHTML = "";
 
     videoEl.innerHTML = `
-        <source src="${currentVideo.video}" type="video/mp4" />
-        ${currentVideo.subtitleFile ? `<track src="${await convertSrtToVtt(currentVideo.subtitleFile)}" kind="subtitles" srclang="en" label="English" default />` : ""}
+        <source src="${currentVideo.video}" type="${currentVideo.type}" />
+        ${currentVideo.subtitle ? `<track src="${currentVideo.subtitle}" kind="subtitles" srclang="en" label="English" default />` : ""}
         Your browser does not support the video tag.
     `;
 
     videoEl.load();
     videoEl.volume = currentVolume;
-    isLoaded = true;
-
-    loadHistory();
-
-    changeScreen("player-screen");
+    isReady = true;
   }
 
   return {
@@ -102,7 +98,7 @@ const Player = (() => {
     replay,
     loadVideo,
     get isLoaded() {
-      return isLoaded;
+      return isReady;
     },
   };
 })();

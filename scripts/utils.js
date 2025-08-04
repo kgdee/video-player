@@ -62,19 +62,19 @@ function getFileText(file) {
   });
 }
 
-async function convertSrtToVtt(srtFile) {
-  if (!srtFile) return "";
+async function convertSrtToVtt(file) {
+  let text = await getFileText(file);
 
-  let srtText = await getFileText(srtFile);
-
-  // Convert SRT to VTT format
   let vttText =
     "WEBVTT\n\n" +
-    srtText
+    text
       .replace(/\r\n|\r|\n/g, "\n") // Normalize new lines
       .replace(/(\d+)\n(\d{2}:\d{2}:\d{2}),(\d{3}) --> (\d{2}:\d{2}:\d{2}),(\d{3})/g, "$1\n$2.$3 --> $4.$5");
 
-  const blob = new Blob([vttText], { type: "text/vtt" });
-  const dataUrl = URL.createObjectURL(blob);
-  return dataUrl;
+  const vttFile = new File([vttText], file.name.replace(/\.srt$/i, ".vtt"), {
+    type: "text/vtt",
+    lastModified: Date.now(),
+  });
+
+  return vttFile;
 }

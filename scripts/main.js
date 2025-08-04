@@ -8,35 +8,39 @@ let currentFiles = [];
 let currentVideos = [];
 let currentVideo = null;
 let darkTheme = load("darkTheme", false);
+let isLoading = false;
 
 document.addEventListener("DOMContentLoaded", function () {
   toggleTheme(darkTheme);
   setInterval(updateHistory(), 10000);
 });
 
-function getVideos(files) {
+async function getVideos(files) {
   currentFiles = files;
   currentVideos = [];
   videosEl.innerHTML = "";
 
   files = Array.from(files).map((file) => {
     const fileName = decodeURIComponent(file.name).split("/").pop();
-    return new File([file], fileName);
+    return new File([file], fileName, { type: file.type });
   });
-  const videoFiles = files.filter((file) => file.name.endsWith(".mp4"));
-  const subtitleFiles = files.filter((file) => file.name.endsWith(".srt"));
-  const thumbnailFiles = files.filter((file) => file.name.match(/\.(jpg|png)$/));
+  const videoFiles = files.filter((file) => file.type.startsWith("video/"));
+  let subtitleFiles = files.filter((file) => file.name.endsWith(".srt"));
+  subtitleFiles = await Promise.all(subtitleFiles.map((file) => convertSrtToVtt(file)));
+  const thumbnailFiles = files.filter((file) => file.type.startsWith("image/"));
 
   videoFiles.forEach((videoFile) => {
-    const videoId = videoFile.name.replace(".mp4", "");
-    const subtitleFile = subtitleFiles.find((sub) => sub.name.startsWith(videoId));
-    const thumbnailFile = thumbnailFiles.find((thumb) => thumb.name.startsWith(videoId));
+    const fileName = videoFile.name;
+    const name = fileName.substring(0, fileName.lastIndexOf(".")) || fileName;
+    const subtitleFile = subtitleFiles.find((file) => file.name.startsWith(name));
+    const thumbnailFile = thumbnailFiles.find((file) => file.name.startsWith(name));
 
     const videoData = {
-      id: videoId,
-      title: videoFile.name.replace(".mp4", ""),
+      id: fileName,
+      type: videoFile.type,
+      title: name,
       video: URL.createObjectURL(videoFile),
-      subtitleFile: subtitleFile || null,
+      subtitle: URL.createObjectURL(subtitleFile),
       thumbnail: thumbnailFile ? URL.createObjectURL(thumbnailFile) : "assets/images/thumbnail.jpg",
     };
     currentVideos.push(videoData);
@@ -50,7 +54,7 @@ function displayVideos() {
     currentVideos
       .map(
         (video) => `
-      <div class="item" onclick="Player.loadVideo('${video.id}')">
+      <div class="item" onclick="loadVideo('${video.id}')">
         <img src="${video.thumbnail}" alt="${video.title}">
         <span class="truncated">${video.title}</span>
       </div>
@@ -67,11 +71,25 @@ function changeScreen(screenName) {
   document.querySelector(`.${screenName}`).classList.remove("hidden");
 }
 
-function goHome(files) {
+async function goHome(files) {
+  if (isLoading) return;
+  isLoading = true;
   Player.isLoaded = false;
   changeScreen("home-screen");
-  getVideos(files || currentFiles);
+  await getVideos(files || currentFiles);
   displayVideos();
+  isLoading = false;
+}
+
+function loadVideo(id) {
+  if (isLoading) return;
+  isLoading = true;
+  Player.loadVideo(id);
+
+  loadHistory();
+  changeScreen("player-screen");
+
+  isLoading = false;
 }
 
 function toggleFullscreen() {
@@ -82,9 +100,9 @@ function toggleFullscreen() {
   }
 }
 
-function updateHistory() {  
+function updateHistory() {
   if (!Player.isLoaded) return;
-  
+
   const history = histories.filter((video) => video.title === currentVideo.title)[0];
 
   if (history) {
@@ -112,7 +130,7 @@ function toggleTheme(force) {
   darkTheme = force != null ? force : !darkTheme;
   document.body.classList.toggle("dark-theme", darkTheme);
   themeToggle.innerHTML = darkTheme ? `<i class="bi bi-sun"></i>` : `<i class="bi bi-moon"></i>`;
-  save("darkTheme", darkTheme)
+  save("darkTheme", darkTheme);
 }
 
 document.addEventListener("keydown", function (event) {
