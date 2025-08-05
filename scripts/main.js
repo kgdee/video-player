@@ -72,7 +72,7 @@ function changeScreen(screenName) {
 async function goHome(files) {
   if (isLoading) return;
   isLoading = true;
-  Player.isLoaded = false;
+  Player.isReady = false;
   changeScreen("home-screen");
   await getVideos(files || currentFiles);
   displayVideos();
@@ -100,7 +100,7 @@ function toggleFullscreen() {
 }
 
 function updateHistory() {
-  if (!Player.isLoaded) return;
+  if (!Player.isReady) return;
 
   const history = histories.filter((video) => video.title === currentVideo.title)[0];
 

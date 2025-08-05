@@ -104,8 +104,11 @@ const Player = (() => {
     changePlaybackRate,
     replay,
     loadVideo,
-    get isLoaded() {
+    get isReady() {
       return isReady;
+    },
+    set isReady(value) {
+      isReady = value
     },
   };
 })();
