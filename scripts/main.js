@@ -30,7 +30,7 @@ async function getVideos(files) {
     const fileName = videoFile.name;
     const name = fileName.substring(0, fileName.lastIndexOf(".")) || fileName;
     let subtitleFile = files.find((file) => file.name.endsWith(".srt") && file.name.startsWith(name));
-    subtitleFile = await convertSrtToVtt(subtitleFile)
+    if (subtitleFile) subtitleFile = await convertSrtToVtt(subtitleFile)
     const thumbnailFile = files.find((file) => file.type.startsWith("image/") && file.name.startsWith(name));
 
     const videoData = {
@@ -38,7 +38,7 @@ async function getVideos(files) {
       type: videoFile.type,
       title: name,
       video: URL.createObjectURL(videoFile),
-      subtitle: URL.createObjectURL(subtitleFile),
+      subtitle: subtitleFile ? URL.createObjectURL(subtitleFile) : null,
       thumbnail: thumbnailFile ? URL.createObjectURL(thumbnailFile) : "assets/images/thumbnail.jpg",
     };
     currentVideos.push(videoData);
@@ -51,8 +51,8 @@ function displayVideos() {
   videosEl.innerHTML =
     currentVideos
       .map(
-        (video) => `
-      <div class="item" onclick="loadVideo('${video.id}')">
+        (video, i) => `
+      <div class="item" onclick="loadVideo(${i})">
         <img src="${video.thumbnail}">
         <span class="truncated">${video.title}</span>
       </div>
@@ -79,9 +79,10 @@ async function goHome(files) {
   isLoading = false;
 }
 
-function loadVideo(id) {
+function loadVideo(index) {
   if (isLoading) return;
   isLoading = true;
+  const id = currentVideos[index].id
   Player.loadVideo(id);
 
   loadHistory();
