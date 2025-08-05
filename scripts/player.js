@@ -4,7 +4,7 @@ const Player = (() => {
   const titleEl = document.querySelector(".player-screen .title");
   const controlsEl = document.querySelector(".controls");
 
-  let currentVolume = load("currentVolume", 0.5);
+  let currentVolume = load("currentVolume", 50);
   let isReady = false;
 
   videoEl.addEventListener("pause", () => {
@@ -19,17 +19,13 @@ const Player = (() => {
   });
 
   videoEl.addEventListener("volumechange", () => {
-    currentVolume = videoEl.volume;
-
-    document.querySelector(".control.volume button").innerHTML = `<i class="bi bi-volume-down"></i> ${parseInt(currentVolume * 100)}%`;
-
+    currentVolume = parseInt(videoEl.volume * 100);
     save("currentVolume", currentVolume);
+    update();
   });
 
   videoEl.addEventListener("ratechange", () => {
-    const playbackRate = videoEl.playbackRate;
-
-    document.querySelector(".control.rate button").innerHTML = `${playbackRate}x`;
+    update();
   });
 
   function pause() {
@@ -46,10 +42,12 @@ const Player = (() => {
   function changeVolume(value) {
     if (!isReady) return;
 
-    value = value != null ? clamp(value, 0, 1) : clamp((videoEl.volume + 0.25) % 1.25, 0, 1);
-    videoEl.volume = value;
+    if (value == null) value = (videoEl.volume * 100 + 25) % 125;
 
-    Toast.show(`${parseInt(value * 100)}%`);
+    value = clamp(value, 0, 100);
+    videoEl.volume = value / 100;
+
+    Toast.show(`${value}%`);
   }
 
   function mute() {
@@ -83,13 +81,22 @@ const Player = (() => {
     `;
 
     videoEl.load();
-    videoEl.volume = currentVolume;
+    videoEl.volume = currentVolume / 100;
     isReady = true;
+  }
+
+  function update() {
+    document.querySelector(".control.volume button").innerHTML = `<i class="bi bi-volume-down"></i> ${currentVolume}%`;
+    const playbackRate = videoEl.playbackRate;
+
+    document.querySelector(".control.rate button").innerHTML = `${playbackRate}x`;
   }
 
   return {
     videoEl,
-    currentVolume,
+    get currentVolume() {
+      return currentVolume;
+    },
     pause,
     jump,
     changeVolume,

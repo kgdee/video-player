@@ -25,15 +25,13 @@ async function getVideos(files) {
     return new File([file], fileName, { type: file.type });
   });
   const videoFiles = files.filter((file) => file.type.startsWith("video/"));
-  let subtitleFiles = files.filter((file) => file.name.endsWith(".srt"));
-  subtitleFiles = await Promise.all(subtitleFiles.map((file) => convertSrtToVtt(file)));
-  const thumbnailFiles = files.filter((file) => file.type.startsWith("image/"));
 
-  videoFiles.forEach((videoFile) => {
+  for (const videoFile of videoFiles) {
     const fileName = videoFile.name;
     const name = fileName.substring(0, fileName.lastIndexOf(".")) || fileName;
-    const subtitleFile = subtitleFiles.find((file) => file.name.startsWith(name));
-    const thumbnailFile = thumbnailFiles.find((file) => file.name.startsWith(name));
+    let subtitleFile = files.find((file) => file.name.endsWith(".srt") && file.name.startsWith(name));
+    subtitleFile = await convertSrtToVtt(subtitleFile)
+    const thumbnailFile = files.find((file) => file.type.startsWith("image/") && file.name.startsWith(name));
 
     const videoData = {
       id: fileName,
@@ -44,7 +42,7 @@ async function getVideos(files) {
       thumbnail: thumbnailFile ? URL.createObjectURL(thumbnailFile) : "assets/images/thumbnail.jpg",
     };
     currentVideos.push(videoData);
-  });
+  };
 }
 
 function displayVideos() {
@@ -55,7 +53,7 @@ function displayVideos() {
       .map(
         (video) => `
       <div class="item" onclick="loadVideo('${video.id}')">
-        <img src="${video.thumbnail}" alt="${video.title}">
+        <img src="${video.thumbnail}">
         <span class="truncated">${video.title}</span>
       </div>
     `
@@ -133,30 +131,38 @@ function toggleTheme(force) {
   save("darkTheme", darkTheme);
 }
 
-document.addEventListener("keydown", function (event) {
-  if (Player.videoEl.contains(event.target)) event.preventDefault();
+function adjustVolume(direction) {
+  const currentVolume = Player.currentVolume
+  let amount = 5 * direction
 
-  const shortcuts = {
-    pause: event.code === "Space" || event.key === " " || event.code === "KeyK",
-    volumeUp: event.code === "ArrowUp" || event.code === "KeyW" || event.code === "KeyI",
-    volumeDown: event.code === "ArrowDown" || event.code === "KeyS" || event.code === "KeyU",
-    mute: event.code === "KeyM",
-    jumpForward: event.code === "KeyL" || event.code === "ArrowRight" || event.code === "KeyD",
-    jumpBackward: event.code === "KeyJ" || event.code === "ArrowLeft" || event.code === "KeyA",
-    fullscreen: event.code === "KeyF",
-  };
-  if (shortcuts.pause) Player.pauseVideo();
-  if (shortcuts.volumeDown || shortcuts.volumeUp) {
-    let amount = 5;
-    if (shortcuts.volumeUp) {
-      amount = Player.currentVolume < 0.05 ? 0.01 : 0.05;
-    } else {
-      amount = Player.currentVolume <= 0.05 ? -0.01 : -0.05;
-    }
-    Player.changeVolume(Player.currentVolume + amount);
+  if ((direction >= 0 && currentVolume <= 4) || (direction < 0 && currentVolume <= 5)) amount = 1 * direction
+  
+  Player.changeVolume(currentVolume + amount);
+}
+
+const keyActions = {
+  Space: Player.pause,
+  KeyK: Player.pause,
+  ArrowUp: () => adjustVolume(1),
+  KeyW: () => adjustVolume(1),
+  KeyI: () => adjustVolume(1),
+  ArrowDown: () => adjustVolume(-1),
+  KeyS: () => adjustVolume(-1),
+  KeyU: () => adjustVolume(-1),
+  KeyM: Player.mute,
+  KeyL: () => Player.jump(5),
+  ArrowRight: () => Player.jump(5),
+  KeyD: () => Player.jump(5),
+  KeyJ: () => Player.jump(-5),
+  ArrowLeft: () => Player.jump(-5),
+  KeyA: () => Player.jump(-5),
+  KeyF: toggleFullscreen,
+};
+
+document.addEventListener("keydown", (event) => {
+  const action = keyActions[event.code];
+  if (action) {
+    event.preventDefault();
+    action();
   }
-  if (shortcuts.mute) Player.mute();
-  if (shortcuts.jumpForward) Player.jump(5);
-  if (shortcuts.jumpBackward) Player.jump(-5);
-  if (shortcuts.fullscreen) toggleFullscreen();
 });
