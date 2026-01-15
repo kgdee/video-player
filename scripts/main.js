@@ -166,4 +166,4 @@ document.addEventListener("keydown", (event) => {
     event.preventDefault();
     action();
   }
-});
+}, true);
