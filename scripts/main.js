@@ -30,7 +30,7 @@ async function getVideos(files) {
     const fileName = videoFile.name;
     const name = fileName.substring(0, fileName.lastIndexOf(".")) || fileName;
     let subtitleFile = files.find((file) => file.name.endsWith(".srt") && file.name.startsWith(name));
-    if (subtitleFile) subtitleFile = await convertSrtToVtt(subtitleFile)
+    if (subtitleFile) subtitleFile = await convertSrtToVtt(subtitleFile);
     const thumbnailFile = files.find((file) => file.type.startsWith("image/") && file.name.startsWith(name));
 
     const videoData = {
@@ -42,22 +42,33 @@ async function getVideos(files) {
       thumbnail: thumbnailFile ? URL.createObjectURL(thumbnailFile) : "assets/images/thumbnail.jpg",
     };
     currentVideos.push(videoData);
-  };
+  }
 }
 
 function displayVideos() {
   messageEl.classList.add("hidden");
 
+  const historiesMap = new Map(
+    histories.map(history => [history.title, history])
+  );
+
   videosEl.innerHTML =
     currentVideos
-      .map(
-        (video, i) => `
-      <div class="item" onclick="loadVideo(${i})">
-        <img src="${video.thumbnail}">
-        <span class="truncated">${video.title}</span>
-      </div>
-    `
-      )
+      .map((video, i) => {
+        const progress = historiesMap.get(video.title)?.progress || 0
+
+        let labelColor = "black"
+        if (progress === 0) labelColor = "var(--blue)"
+        else if (progress >= 90) labelColor = "var(--green)"
+
+        return `
+            <div class="item" onclick="loadVideo(${i})">
+              <img src="${video.thumbnail}">
+              <span class="truncated">${video.title}</span>
+              <span class="progress" style="background-color: ${labelColor};">${progress}%</span>
+            </div>
+          `;
+      })
       .join("") || "No videos found!";
 }
 
@@ -82,7 +93,7 @@ async function goHome(files) {
 function loadVideo(index) {
   if (isLoading) return;
   isLoading = true;
-  const id = currentVideos[index].id
+  const id = currentVideos[index].id;
   Player.loadVideo(id);
 
   loadHistory();
@@ -104,10 +115,15 @@ function updateHistory() {
 
   const history = histories.filter((video) => video.title === currentVideo.title)[0];
 
+  const time = Player.videoEl.currentTime;
+  const duration = Player.videoEl.duration;
+  const progress = Number(((time / duration) * 100).toFixed(1));
+
   if (history) {
-    history.time = Player.videoEl.currentTime;
+    history.time = time;
+    history.progress = progress;
   } else {
-    histories.push({ title: currentVideo.title, time: Player.videoEl.currentTime });
+    histories.push({ title: currentVideo.title, time, progress });
 
     if (histories.length > 10) {
       histories.shift();
@@ -133,11 +149,11 @@ function toggleTheme(force) {
 }
 
 function adjustVolume(direction) {
-  const currentVolume = Player.currentVolume
-  let amount = 5 * direction
+  const currentVolume = Player.currentVolume;
+  let amount = 5 * direction;
 
-  if ((direction >= 0 && currentVolume <= 4) || (direction < 0 && currentVolume <= 5)) amount = 1 * direction
-  
+  if ((direction >= 0 && currentVolume <= 4) || (direction < 0 && currentVolume <= 5)) amount = 1 * direction;
+
   Player.changeVolume(currentVolume + amount);
 }
 
@@ -160,10 +176,14 @@ const keyActions = {
   KeyF: toggleFullscreen,
 };
 
-document.addEventListener("keydown", (event) => {
-  const action = keyActions[event.code];
-  if (action) {
-    event.preventDefault();
-    action();
-  }
-}, true);
+document.addEventListener(
+  "keydown",
+  (event) => {
+    const action = keyActions[event.code];
+    if (action) {
+      event.preventDefault();
+      action();
+    }
+  },
+  true,
+);
