@@ -57,15 +57,15 @@ function displayVideos() {
       .map((video, i) => {
         const progress = historiesMap.get(video.title)?.progress || 0
 
-        let labelColor = "black"
-        if (progress === 0) labelColor = "var(--blue)"
-        else if (progress >= 90) labelColor = "var(--green)"
-
         return `
             <div class="item" onclick="loadVideo(${i})">
-              <img src="${video.thumbnail}">
+              <div class="thumbnail">
+                <img src="${video.thumbnail}">
+                <div class="progress">
+                  <div style="width: ${progress}%;"></div>
+                </div>
+              </div>
               <span class="truncated">${video.title}</span>
-              <span class="progress" style="background-color: ${labelColor};">${progress}%</span>
             </div>
           `;
       })
@@ -87,17 +87,19 @@ async function goHome(files) {
   changeScreen("home-screen");
   await getVideos(files || currentFiles);
   displayVideos();
+  document.title = "Video Player"
   isLoading = false;
 }
 
 function loadVideo(index) {
   if (isLoading) return;
   isLoading = true;
-  const id = currentVideos[index].id;
-  Player.loadVideo(id);
+  const video = currentVideos[index]
+  Player.loadVideo(video.id);
 
   loadHistory();
   changeScreen("player-screen");
+  document.title = video.title
 
   isLoading = false;
 }
@@ -125,7 +127,7 @@ function updateHistory() {
   } else {
     histories.push({ title: currentVideo.title, time, progress });
 
-    if (histories.length > 10) {
+    if (histories.length > 100) {
       histories.shift();
     }
   }
